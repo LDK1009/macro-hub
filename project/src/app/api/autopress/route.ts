@@ -1,7 +1,7 @@
 import axios from "axios";
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
-import * as cheerio from 'cheerio';
+import * as cheerio from "cheerio";
 
 // Unsplash API 설정
 // const UNSPLASH_ACCESS_KEY = process.env.UNSPLASH_ACCESS_KEY;
@@ -68,30 +68,78 @@ export async function POST(req: NextRequest) {
     };
 
     // 시스템 프롬프트
-    const rolePrompt = `
-      당신은 JSON 데이터만 출력하는 AI입니다. 다음 규칙을 반드시 따르세요:
-
-      1. 응답은 반드시 올바른 JSON 형식으로 출력해야 합니다.
-      2. 문자열, 숫자, 불리언 등 JSON 데이터 타입만 사용하세요.
-      3. 절대 설명, 서론, 말머리 텍스트 없이 JSON만 출력하세요.
-      4. \`\`\`json 등의 포맷팅 없이 오직 순수 JSON만 출력하세요.
-
-      [응답 형식]
-      {
-        "imageKeywords": ["키워드1", "키워드2", ...],
-        "content": "HTML 컨텐츠"
-      }
-
-      [응답 예시]
-      {
-        "imageKeywords": ["Notion", "Productivity", "Workspace"],
-        "content": "<h1>노션을 활용한 업무 생산성 향상 방법</h1><p>노션은 강력한 업무 관리 도
-        구로 다양한 기능을 제공하여 업무 생산성을 향상시킬 수 있습니다.<p/>
-        ..."
-      } 
+    const rolePrompt = 
     `
+    당신은 고급 블로그 콘텐츠를 작성하는 AI입니다. 아래 규칙을 반드시 따르세요:
 
+1. 글의 전체 분량은 최소 1,200자 이상이어야 하며, 풍부한 정보와 구체적인 예시를 제공합니다.
+2. 다음과 같은 구조로 구성합니다:
+   - 제목 (title)
+   - 도입부 (introduction): 공감 유도 및 전체 주제 개요
+   - 본문 (body): 소제목 단위의 세부 내용 포함
+   - 결론 (conclusion): 핵심 요약 및 행동 요청(CTA)
+
+3. 본문에는 다음과 같은 요소들을 적절히 활용해야 합니다:
+   - ✅ **리스트**: 번호 리스트나 불릿포인트로 정보 정리
+   - 📊 **테이블**: 비교, 수치, 요약 등 표 형식으로 정리
+   - 🔗 **링크**: 유용한 사이트, 참고자료 URL 포함
+   - 🟢 **버튼 또는 강조 문구**: 클릭 유도형 문구 (예: “👉 지금 확인하기”)
+
+4. 콘텐츠 스타일은 다음을 따릅니다:
+   - 문장은 친절하고 설명 위주로 작성하되, 지루하지 않도록 대화형 톤도 섞어 사용합니다.
+   - 실질적인 도움을 줄 수 있도록 경험 기반의 예시나 실용적인 팁을 포함합니다.
+   - 필요 시 실제 사례나 유의사항도 함께 제공하세요.
+
+5. 본문에 다음과 같은 HTML 마크업 구조를 JSON 형식으로 포함하세요:
+
+
+json 형식으로 출력합니다.
+{
+  "title": "블로그 제목",
+  "imageKeywords": ["주제 관련 이미지 키워드"],
+  "body": [
+    {
+      "type": "Introduction",
+      "content": "도입부 내용"
+    },
+    {
+      "type": "Section",
+      "heading": "소제목 1",
+      "content": "해당 소제목의 설명",
+      "list": [
+        "항목 1",
+        "항목 2"
+      ]
+    },
+    {
+      "type": "Section",
+      "heading": "소제목 2",
+      "table": {
+        "headers": ["항목", "내용", "비고"],
+        "rows": [
+          ["예시1", "설명1", "참고1"],
+          ["예시2", "설명2", "참고2"]
+        ]
+      }
+    },
+    {
+      "type": "Section",
+      "heading": "관련 링크",
+      "link": {
+        "text": "국세청 증여세 계산기 바로가기",
+        "url": "https://m.site.naver.com/1vyJC"
+      }
+    },
+    {
+      "type": "Conclusion",
+      "content": "핵심 요약 및 행동 요청 문장"
+    }
+  ]
+}
+
+    `
     
+
     const systemPrompt1 = `
       당신은 전문적인 블로그 포스팅 작성 AI입니다. 다음 규칙을 엄격히 준수해주세요:
       
@@ -113,7 +161,6 @@ export async function POST(req: NextRequest) {
       4. 이미지는 최소 3개 이상 삽입합니다.
       5. SEO를 고려해 키워드를 자연스럽게 본문에 여러 번 노출시킵니다.
     `;
-
 
     const systemPrompt2 = `
       당신은 전문적인 블로그 포스팅 작성 AI입니다. 다음 규칙을 엄격히 준수해주세요:
@@ -144,10 +191,6 @@ export async function POST(req: NextRequest) {
           content: rolePrompt,
         },
         {
-          role: "system",
-          content: systemPrompt2,
-        },
-        {
           role: "user",
           content: userPrompt,
         },
@@ -157,7 +200,18 @@ export async function POST(req: NextRequest) {
 
     // AI 응답 처리
     const gptResponse = completion.choices[0].message.content;
-    console.log(gptResponse);
+
+    console.log(JSON.parse(gptResponse || ""));
+
+    return NextResponse.json(
+      {
+        message: "POST 요청 성공",
+        receivedData: gptResponse,
+      },
+      { status: 201 }
+    );
+
+
     const gptResponseObj = JSON.parse(gptResponse || "");
     const imageKeywords = gptResponseObj.imageKeywords;
     const articleHtml = gptResponseObj.content;
@@ -170,11 +224,11 @@ export async function POST(req: NextRequest) {
 
     // cheerio를 사용하여 HTML 파싱
     const $ = cheerio.load(articleHtml);
-    
+
     // 모든 img 태그를 찾아서 src 속성 업데이트
-    $('img').each((index, element) => {
+    $("img").each((index, element) => {
       if (index < imageUrls.length) {
-        $(element).attr('src', imageUrls[index]);
+        $(element).attr("src", imageUrls[index]);
       }
     });
 
