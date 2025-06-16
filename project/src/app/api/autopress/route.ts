@@ -1,16 +1,7 @@
 import axios from "axios";
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
-import * as cheerio from "cheerio";
-import {
-  extractContentEncoded,
-  getHeadlineNewsBlock,
-  getHeadlineNewsLink,
-  getMyLatestArticle,
-  makeSectionImgTag,
-  makeSectionTextTag,
-} from "@/utils/auto-press/api/make-article";
-import { ArticleBlockType, ArticleSectionType } from "@/types/auto-press/block";
+import { extractContentEncoded, makeContentHtml } from "@/utils/auto-press/api/make-article";
 
 // OpenAI 클라이언트 초기화
 const openai = new OpenAI({
@@ -275,30 +266,17 @@ export async function POST(req: NextRequest) {
     // GPT 응답
     const gptResponse = JSON.parse(completion.choices[0].message.content || "");
 
-    // 섹션 HTML 추가
-    const sectionHtmls = await Promise.all(
-      gptResponse.sections.map(async (section: ArticleSectionType) => {
-        const sectionThumbnail = await makeSectionImgTag(section.sectionKeyword);
-        const sectionTitle = `<h2>${section.title}</h2>`;
-        const sectionBlockList = section.blocks.map((block: ArticleBlockType) => {
-          return makeSectionTextTag(block);
-        });
-        const sectionBlockHtml = sectionBlockList.join("");
-        return `${sectionTitle}${sectionThumbnail}${sectionBlockHtml}`;
-      })
-    );
+    // 콘텐츠 HTML 생성
+    const contentHtml = await makeContentHtml(gptResponse);
 
-    // 최종 컨텐츠 HTML
-    const articleHtml = sectionHtmls.join("");
-
-    // article
+    // 워드프레스 게시물 정보
     const articleInfo = {
       title: gptResponse.title,
-      content: articleHtml,
+      content: contentHtml,
       status: "publish",
     };
 
-    // WordPress에 포스트 업로드
+    // 워드프레스 게시물 업로드
     await axios.post(`https://m3088787.mycafe24.com/wp-json/wp/v2/posts`, articleInfo, axiosConfig);
 
     return NextResponse.json(articleInfo, { status: 201 });
