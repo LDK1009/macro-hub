@@ -89,12 +89,12 @@ export const getHeadlineNewsBlock = async () => {
   return finalBlock;
 };
 
-////////// 내 최신 게시물 5개 가져오기
+////////// 내 최신 게시물 3개 가져오기
 export const getMyLatestArticle = async () => {
   // 내 게시물 가져오기
   const response = await axios.get("https://m3088787.mycafe24.com/wp-json/wp/v2/posts");
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const postList = response.data.slice(0, 5).map((el: any) => {
+  const postList = response.data.slice(0, 3).map((el: any) => {
     const title = el.title.rendered;
     const url = el.link;
 
