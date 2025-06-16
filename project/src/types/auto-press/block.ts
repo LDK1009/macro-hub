@@ -1,11 +1,11 @@
 export type ArticleSectionType = {
-  type: "도입부" | "본문" | "요약" | "결론" | "행동 유도";
+  type: "도입부" | "본문" | "요약" | "결론" ;
   title: string;
   sectionKeyword: string;
   blocks: ArticleBlockType[];
 };
 
-export type ArticleBlockType = TextBlockType | SubjectBlockType | TableBlockType | ButtonBlockType | ListBlockType | LinkBlockType;
+export type ArticleBlockType = TextBlockType | SubjectBlockType | TableBlockType | ButtonBlockType | ListBlockType ;
 
 export type TextBlockType = {
   type: "text";
@@ -36,12 +36,4 @@ export type ButtonBlockType = {
 export type ListBlockType = {
   type: "list";
   content: string[];
-};
-
-export type LinkBlockType = {
-  type: "link";
-  content: {
-    text: string;
-    url: string;
-  }
 };

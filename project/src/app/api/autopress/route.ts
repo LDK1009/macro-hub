@@ -2,7 +2,14 @@ import axios from "axios";
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
 import * as cheerio from "cheerio";
-import { makeSectionImgTag, makeSectionTextTag } from "@/utils/auto-press/api/make-article";
+import {
+  extractContentEncoded,
+  getHeadlineNewsBlock,
+  getHeadlineNewsLink,
+  getMyLatestArticle,
+  makeSectionImgTag,
+  makeSectionTextTag,
+} from "@/utils/auto-press/api/make-article";
 import { ArticleBlockType, ArticleSectionType } from "@/types/auto-press/block";
 
 // OpenAI 클라이언트 초기화
@@ -17,10 +24,10 @@ const openai = new OpenAI({
  */
 export async function POST(req: NextRequest) {
   try {
-    const response = await axios.get("https://google.nongsaro.co.kr/170");
-    const $ = cheerio.load(response.data);
-    const articleContent = $("p,h1,h2,h3,h4,h5,h6,li,a").text();
-    console.log(articleContent);
+    // const headlineNewsBlock = await getHeadlineNewsBlock();
+    // const myLatestArticle = await getMyLatestArticle();
+    const newsContent = await extractContentEncoded();
+    // return NextResponse.json(newsContent, { status: 201 });
 
     // const body = await req.json();
 
@@ -41,23 +48,61 @@ export async function POST(req: NextRequest) {
 
     // 시스템 프롬프트
     const articleSystemPrompt = `
-    당신은 고급 블로그 콘텐츠를 작성하는 AI입니다. 
-    아래 규칙을 반드시 따르세요:
-
-    # 콘텐츠 구조
-    1. 콘텐츠의 계층구조는 블럭과 섹션 순으로 구조화됩니다.
-    2. 블럭이란 섹션의 하위 요소입니다. 블럭은 텍스트, 소제목 + 텍스트, 테이블, 버튼, 리스트로 분류되며, 블럭을 조합하여 섹션을 구성합니다.
-    3. 섹션은 콘텐츠의 최상위 요소입니다. 섹션은 제목, 도입부, 본문, 요약, 결론, 행동 유도로 분류됩니다. 섹션을 조합하여 콘텐츠를 구성합니다.
-
-    # 콘텐츠 구성 규칙
-    1. 하나의 콘텐츠는 최소 6개 이상의 섹션으로 구성되어야하며, '제목, 도입부, 본문, 요약, 결론, 행동 유도' 섹션은 필수로 포함되어야 합니다.
-    2. 하나의 섹션은 최소 3개 이상의 블럭으로 구성되어야 합니다.
-    3. 모든 섹션은 텍스트 블럭을 필수로 포함하여야합니다.
-    4. 본문 섹션은 최소 10개 이상의 블럭을 포함하여야합니다.
-    5. 본문의 글자수는 1,500 ~ 2,500자 사이로 작성합니다.
-    6. 행동 유도 섹션은 최소 1개 이상의 버튼 블럭을 포함하여야합니다.
-    7. 섹션 키워드에는 이미지 검색 키워드 1개를 입력합니다.
+    당신은 SEO에 최적화된 블로그 포스트 작성 AI입니다. 아래 규칙을 반드시 따르세요:
     
+    1. 전체 글 분량은 최소 1500자 이상이며, 자연스럽고 실용적인 어조를 유지합니다.
+    2. 제목(title)은 핵심 키워드를 포함하고, 숫자, 혜택, 행동 유도 표현을 반드시 포함합니다. (예: "하루 10분으로 3kg 감량한 자취생 다이어트 꿀팁 5가지")
+    3. 글은 도입부, 본문, 요약, 결론 4개의 섹션으로 나뉘며, 각 섹션은 하나의 section 객체로 구성됩니다.
+    4. 각 section은  type, title, sectionKeyword, blocks 속성을 갖습니다. sectionKeyword는 해당 섹션을 대표하는 이미지 검색용 영문 키워드입니다.
+    5. blocks는 아래 타입 중 하나로 구성되며, 각 블록은 자연스러운 흐름으로 이어지도록 배치해야 합니다:
+    
+       - text: 일반 문단 서술 (300자 이상)
+       - subject: 소제목과 해당 설명. 하나의 주제 단위.
+       - list: 정보 요약이나 팁을 항목별로 제시
+       - table: 비교 또는 정리용 표 (예: 가격 비교, 장단점 비교 등)
+       - button: CTA 버튼 (예: 구매하러 가기, 관련 글 보기)
+       - link: 참고 링크 (예: “공식 사이트 보기”)
+    
+    6. 각 section은 목적이 분명해야 하며 다음과 같은 내용을 담습니다:
+    
+       - 도입부: 문제 제기, 공감 유도, 핵심 요약. 독자의 시선을 끌어야 합니다.
+       - 본문: 실제 정보, 방법, 팁, 사례 등 핵심 내용. 소제목 중심으로 논리적으로 구성합니다.
+       - 요약: 내용을 정리하고 표와 리스트를 통해 복습합니다.
+       - 결론: 핵심 요약 + 독자에게 적용하라는 제안. CTA 버튼 또는 링크 포함.
+    
+    7. SEO를 위해 keyword는 제목, 도입부, 본문, 결론에 최소 1회 이상 자연스럽게 삽입합니다 (총 3~5회 이상).
+    8. 출력 형식은 반드시 아래 JSON 형식을 따르며, 모든 값은 이중 따옴표로 감싸야 합니다.
+    
+    [도입부 섹션 규칙]
+    type은 반드시 "도입부"여야 합니다.
+    blocks에는 text 블럭만 사용하며, 1~2개 포함해야 합니다.
+    첫 번째 문단은 문제 제기 또는 독자의 공감을 유도하는 내용으로 시작합니다.
+    이어지는 문단은 글의 목적과 앞으로 다룰 내용을 간단히 예고하는 내용을 포함해야 합니다.
+    전체 분량은 300자 이상이어야 하며, 자연스럽고 친근한 어조를 사용합니다.
+
+    [본문 섹션 규칙]
+    type은 반드시 "본문"이어야 합니다.
+    blocks 내 subject 블럭은 최소 5개 이상 포함해야 합니다.
+    각 subject 블럭 아래에는 해당 주제를 설명하는 text 블럭을 1개 이상 포함해야 합니다.
+    list 블럭은 최소 2개 이상 포함, 각 리스트는 항목 3개 이상으로 구성해야 합니다.
+    table 블럭은 최소 1개 이상 포함, 각 테이블은 3열 이상, 3행 이상으로 구성해야 합니다.
+    button 또는 link 블럭은 최소 1개 포함해야 하며, 사용자 행동(CTA)을 유도해야 합니다.
+    각 subject 단위(소제목 + 설명)는 300자 이상이어야 하며, 단순 나열이 아니라 팁, 경험, 비교 중심으로 작성되어야 합니다.
+    전체 블럭은 논리적 흐름에 따라 구성되며, 독자 입장에서 실용적이고 알찬 정보를 제공해야 합니다.
+
+    [요약 섹션 규칙]
+    type은 반드시 "요약"이어야 합니다.
+    table 블럭은 최소 2개 이상 포함, 각 테이블은 3열 이상, 3행 이상으로 구성해야 합니다.
+    list 블럭은 최소 1개 이상 포함, 각 리스트는 항목 3개 이상으로 구성해야 합니다.
+    요약 내용은 본문 내용을 단순 반복하지 않고, 독자가 전체 내용을 한눈에 정리하고 복습할 수 있도록 구성해야 합니다.
+    가능한 경우 비교, 분류, 장단점 요약 등 구조적 정리 방식을 활용합니다.
+
+    [결론 섹션 규칙]
+    type은 반드시 "결론"이어야 합니다.
+    text 블럭은 최소 2개 이상 포함해야 하며, 핵심 내용 요약 및 실천 방향 제시를 포함해야 합니다.
+    button 또는 link 블럭은 1개 이상 포함하여, 독자의 행동(CTA)을 유도해야 합니다.
+    마지막 문장은 독자에게 질문을 던지거나 실천을 유도하는 문장으로 마무리해야 합니다.
+    전체 흐름은 자연스럽게 마무리되며, 앞서 읽은 내용이 기억에 남도록 정리합니다.
     `;
 
     const jsonSystemPrompt = `
@@ -73,7 +118,29 @@ export async function POST(req: NextRequest) {
           blocks: [
             {
               type: "text",
-              content: "텍스트"
+              content: "일반 텍스트"
+            },
+            {
+              type: "subject",
+              title: "소제목",
+              text: "설명"
+            },
+            {
+              type: "list",
+              content: ["리스트 아이템1", "리스트 아이템2", "리스트 아이템3"]
+            },
+            {
+              type: "table",
+              content: {
+                items: [["헤드1", "헤드2", "헤드3"], ["내용1", "내용2", "내용3"]]
+              }
+            },
+            {
+              type: "button",
+              content: {
+                text: "버튼 텍스트",
+                url: "버튼 링크"
+              };
             },
             ...
           ]
@@ -84,13 +151,30 @@ export async function POST(req: NextRequest) {
           sectionKeyword: "섹션에 삽입할 이미지 키워드 1개",
           blocks: [
             {
-              type: "subject",
-              title: "소분류 제목",
-              text: "소분류 내용"
+              type: "text",
+              content: "일반 텍스트"
             },
             {
-              type: "text",
-              content: "텍스트"
+              type: "subject",
+              title: "소제목",
+              text: "설명"
+            },
+            {
+              type: "list",
+              content: ["리스트 아이템1", "리스트 아이템2", "리스트 아이템3"]
+            },
+            {
+              type: "table",
+              content: {
+                items: [["헤드1", "헤드2", "헤드3"], ["내용1", "내용2", "내용3"]]
+              }
+            },
+            {
+              type: "button",
+              content: {
+                text: "버튼 텍스트",
+                url: "버튼 링크"
+              };
             },
             ...
           ]
@@ -101,21 +185,30 @@ export async function POST(req: NextRequest) {
           sectionKeyword: "섹션에 삽입할 이미지 키워드 1개",
           blocks: [
             {
-              type: "table",
-              content: {
-                items: [
-                  ["텍스트", "텍스트" , "텍스트"],
-                  ["텍스트", "텍스트", "텍스트"],
-                ]
-              }
+              type: "text",
+              content: "일반 텍스트"
+            },
+            {
+              type: "subject",
+              title: "소제목",
+              text: "설명"
             },
             {
               type: "list",
-              content: [
-                "텍스트",
-                "텍스트",
-                "텍스트",
-              ]
+              content: ["리스트 아이템1", "리스트 아이템2", "리스트 아이템3"]
+            },
+            {
+              type: "table",
+              content: {
+                items: [["헤드1", "헤드2", "헤드3"], ["내용1", "내용2", "내용3"]]
+              }
+            },
+            {
+              type: "button",
+              content: {
+                text: "버튼 텍스트",
+                url: "버튼 링크"
+              };
             },
             ...
           ]
@@ -127,29 +220,33 @@ export async function POST(req: NextRequest) {
           blocks: [
             {
               type: "text",
-              content: {
-                text: "텍스트",
-              }
+              content: "일반 텍스트"
             },
-            ...
-          ]
-        },
-        {
-          type: "행동 유도",
-          title: "섹션 제목",
-          sectionKeyword: "섹션에 삽입할 이미지 키워드 1개",
-          blocks: [
             {
-              type: "link",
+              type: "subject",
+              title: "소제목",
+              text: "설명"
+            },
+            {
+              type: "list",
+              content: ["리스트 아이템1", "리스트 아이템2", "리스트 아이템3"]
+            },
+            {
+              type: "table",
               content: {
-                text: "텍스트",
-                url: "https://www.google.com" 
+                items: [["헤드1", "헤드2", "헤드3"], ["내용1", "내용2", "내용3"]]
               }
+            },
+            {
+              type: "button",
+              content: {
+                text: "버튼 텍스트",
+                url: "버튼 링크"
+              };
             },
             ...
           ]
         },
-        
       ]
     }
     `;
@@ -168,7 +265,8 @@ export async function POST(req: NextRequest) {
         },
         {
           role: "user",
-          content: `${articleContent} 위 내용을 참고하여 아주 비슷한 글을 작성해줘`,
+          // content: `카운티와 아래 카테고리 중 하나를 연관지어서 글 작성해줘 재테크·투자ㅣ건강·의료·다이어트ㅣIT·디지털·앱·리뷰ㅣ온라인 비즈니스·부업·블로그 운영ㅣ여행·숙박·항공ㅣ자기계발·교육·자격증`,
+          content: `${newsContent[0]} 위 내용을 기반으로 글 작성해줘, 사람들이 모를것 같은 용어는 꼭 설명해줘}`,
         },
       ],
       response_format: { type: "json_object" },
