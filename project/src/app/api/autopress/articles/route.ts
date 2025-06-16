@@ -1,29 +1,15 @@
 import axios from "axios";
 import { NextRequest, NextResponse } from "next/server";
-import OpenAI from "openai";
 import { extractContentEncoded, makeContentHtml } from "@/utils/auto-press/api/make-article";
+import { openai } from "@/lib/openAi";
 
-// OpenAI 클라이언트 초기화
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-
-/**
- * POST 요청 처리 예시
- *
- * 요청 본문(body)에서 데이터를 받아 처리하는 방법을 보여줍니다.
- */
+////////// POST
 export async function POST(req: NextRequest) {
   try {
-    // const headlineNewsBlock = await getHeadlineNewsBlock();
-    // const myLatestArticle = await getMyLatestArticle();
-    const newsContent = await extractContentEncoded();
-    // return NextResponse.json(newsContent, { status: 201 });
-
     // const body = await req.json();
-
-    // 실제 데이터 처리 로직이 여기에 들어갑니다
     // console.log("받은 데이터:", body);
+
+    const newsContent = await extractContentEncoded();
 
     // 워드프레스 Basic 인증 헤더 생성
     // const basicAuth = "Basic " + Buffer.from(`${wpId}:${wpApplicationPw}`).toString("base64");
@@ -256,7 +242,6 @@ export async function POST(req: NextRequest) {
         },
         {
           role: "user",
-          // content: `카운티와 아래 카테고리 중 하나를 연관지어서 글 작성해줘 재테크·투자ㅣ건강·의료·다이어트ㅣIT·디지털·앱·리뷰ㅣ온라인 비즈니스·부업·블로그 운영ㅣ여행·숙박·항공ㅣ자기계발·교육·자격증`,
           content: `${newsContent[0]} 위 내용을 기반으로 글 작성해줘, 사람들이 모를것 같은 용어는 꼭 설명해줘}`,
         },
       ],
@@ -281,31 +266,6 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(articleInfo, { status: 201 });
   } catch (error) {
-    console.error(error);
-    return NextResponse.json({ error: "POST 요청 처리 실패" }, { status: 500 });
-  }
-}
-
-/**
- * PUT 요청 처리 예시
- *
- * 리소스 업데이트를 위한 요청 처리 방법을 보여줍니다.
- */
-export async function PUT(req: NextRequest) {
-  try {
-    const body = await req.json();
-
-    // 실제 업데이트 로직이 여기에 들어갑니다
-
-    return NextResponse.json(
-      {
-        message: "PUT 요청 성공",
-        updatedData: body,
-      },
-      { status: 200 }
-    );
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json({ error: "PUT 요청 처리 실패" }, { status: 500 });
+    return NextResponse.json(error, { status: 500 });
   }
 }
