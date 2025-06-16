@@ -1,7 +1,7 @@
-import axios from "axios";
 import { NextRequest, NextResponse } from "next/server";
 import { extractContentEncoded, makeContentHtml } from "@/utils/auto-press/api/make-article";
 import { openai } from "@/lib/openAi";
+import { postWordpressArticle, WordpressArticleInfoType } from "@/utils/core/wordpress";
 
 ////////// POST
 export async function POST(req: NextRequest) {
@@ -10,18 +10,6 @@ export async function POST(req: NextRequest) {
     // console.log("받은 데이터:", body);
 
     const newsContent = await extractContentEncoded();
-
-    // 워드프레스 Basic 인증 헤더 생성
-    // const basicAuth = "Basic " + Buffer.from(`${wpId}:${wpApplicationPw}`).toString("base64");
-    const basicAuth = "Basic " + Buffer.from(`m3088787:hONc Hojo dlsv EfFd AUHd dqwk`).toString("base64");
-
-    // 워드프레스 요청 헤더 설정
-    const axiosConfig = {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: basicAuth,
-      },
-    };
 
     // 시스템 프롬프트
     const articleSystemPrompt = `
@@ -261,8 +249,12 @@ export async function POST(req: NextRequest) {
       status: "publish",
     };
 
-    // 워드프레스 게시물 업로드
-    await axios.post(`https://m3088787.mycafe24.com/wp-json/wp/v2/posts`, articleInfo, axiosConfig);
+    await postWordpressArticle({
+      wpUrl: "https://m3088787.mycafe24.com",
+      wpId: "m3088787",
+      wpApplicationPw: "hONc Hojo dlsv EfFd AUHd dqwk",
+      articleInfo: articleInfo as WordpressArticleInfoType,
+    });
 
     return NextResponse.json(articleInfo, { status: 201 });
   } catch (error) {
