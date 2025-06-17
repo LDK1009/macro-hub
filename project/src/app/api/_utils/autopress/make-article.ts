@@ -1,19 +1,20 @@
-import { ArticleBlockType, ArticleSectionType } from "@/types/auto-press/block";
-import { searchImage } from "@/utils/core/image";
+import { ArticleBlockType, ArticleSectionType } from "@/types/autopress/block";
+import { searchImage } from "@/app/api/_utils/common/image";
 import axios from "axios";
 import * as cheerio from "cheerio";
 
+////////// 섹션 타이틀 HTML 생성
 export const makeSectionTitleHtml = (title: string) => {
   return `<h2 class="custom-section-title">${title}</h2>`;
 };
 
-////////// 이미지 HTML 생성
+////////// 섹션 이미지 HTML 생성
 export const makeSectionImgHtml = async (imageKeyword: string) => {
   const imgLink = await searchImage(imageKeyword);
   return `<img src="${imgLink}" alt="${imageKeyword}" class="custom-section-img"/>`;
 };
 
-////////// 블럭 별 HTML 생성
+////////// 섹션 블럭 별 HTML 생성
 export const makeSectionTextTag = (block: ArticleBlockType) => {
   if (block.type === "text") {
     return `<p class="custom-text">${block.content}</p>`;
@@ -37,7 +38,7 @@ export const makeSectionTextTag = (block: ArticleBlockType) => {
   }
 };
 
-////////// 섹션 블럭 전체 HTML 생성
+////////// 섹션 블럭 별 HTML 생성
 export const makeSectionBlockListHtml = (blockList: ArticleBlockType[]) => {
   // 블럭 HTML 배열 생성
   const sectionBlockHtmlList = blockList.map((block: ArticleBlockType) => {
@@ -76,8 +77,7 @@ export const getHeadlineNewsBlock = async () => {
   const headlineNewsObjList = await getHeadlineNewsLink();
 
   const headlineNewsBlockList = headlineNewsObjList.map(
-    (item) =>
-      `<a href="${item.link}" target="_blank" class="custom-news-headline">${item.title.trim()}</a>`
+    (item) => `<a href="${item.link}" target="_blank" class="custom-news-headline">${item.title.trim()}</a>`
   );
 
   // 최종 블럭
@@ -122,31 +122,35 @@ export const getMyLatestArticleBlock = async () => {
 
 ////////// 게시물 콘텐츠 HTML 생성
 export const makeContentHtml = async (gptResponse: { title: string; sections: ArticleSectionType[] }) => {
-  // 섹션별 HTML 배열 생성
-  const sectionHtmlList = await Promise.all(
-    gptResponse.sections.map(async (section: ArticleSectionType) => {
-      // 섹션 이미지
-      const sectionImgHtml = await makeSectionImgHtml(section.sectionKeyword);
-      // 섹션 제목
-      const sectionTitleHtml = makeSectionTitleHtml(section.title);
-      // 섹션 블럭
-      const sectionBlockListHtml = makeSectionBlockListHtml(section.blocks);
+  try {
+    // 섹션별 HTML 배열 생성
+    const sectionHtmlList = await Promise.all(
+      gptResponse.sections.map(async (section: ArticleSectionType) => {
+        // 섹션 이미지
+        const sectionImgHtml = await makeSectionImgHtml(section.sectionKeyword);
+        // 섹션 제목
+        const sectionTitleHtml = makeSectionTitleHtml(section.title);
+        // 섹션 블럭
+        const sectionBlockListHtml = makeSectionBlockListHtml(section.blocks);
 
-      return `${sectionTitleHtml}${sectionImgHtml}${sectionBlockListHtml}`;
-    })
-  );
+        return `${sectionTitleHtml}${sectionImgHtml}${sectionBlockListHtml}`;
+      })
+    );
 
-  // 섹션 전체 HTML
-  const contentHtml = sectionHtmlList.join("");
+    // 섹션 전체 HTML
+    const contentHtml = sectionHtmlList.join("");
 
-  // 헤드라인 뉴스, 내 최신 게시물 블럭 가져오기
-  const headlineNewsHtml = await getHeadlineNewsBlock();
-  const myLatestArticleHtml = await getMyLatestArticleBlock();
+    // 헤드라인 뉴스, 내 최신 게시물 블럭 가져오기
+    const headlineNewsHtml = await getHeadlineNewsBlock();
+    const myLatestArticleHtml = await getMyLatestArticleBlock();
 
-  // 최종 컨텐츠 HTML
-  const finalContentHtml = `${headlineNewsHtml}${contentHtml}${myLatestArticleHtml}`;
+    // 최종 컨텐츠 HTML
+    const finalContentHtml = `${headlineNewsHtml}${contentHtml}${myLatestArticleHtml}`;
 
-  return finalContentHtml;
+    return finalContentHtml;
+  } catch (error) {
+    throw error;
+  }
 };
 
 ////////// 뉴스 콘텐츠 추출
@@ -166,4 +170,3 @@ export const extractContentEncoded = async () => {
   // 연속된 공백 제거 및 줄바꿈 정리
   return contents;
 };
-

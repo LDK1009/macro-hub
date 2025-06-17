@@ -1,13 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
-import { extractContentEncoded, makeContentHtml } from "@/utils/auto-press/api/make-article";
-import { openai } from "@/lib/openAi";
-import { postWordpressArticle, WordpressArticleInfoType } from "@/utils/core/wordpress";
+import { extractContentEncoded, makeContentHtml } from "@/app/api/_utils/autopress/make-article";
+import { postWordpressArticle, validateWordpressUser, WordpressArticleInfoType } from "@/app/api/_utils/common/wordpress";
+import { openai } from "@/app/api/_lib/openAi";
+
 
 ////////// POST
 export async function POST(req: NextRequest) {
   try {
-    // const body = await req.json();
-    // console.log("받은 데이터:", body);
+    const body = await req.json();
+    const { wpUrl, wpId, wpApplicationPw } = body;
+
+    await validateWordpressUser({ wpUrl, wpId, wpApplicationPw });
 
     const newsContent = await extractContentEncoded();
 
@@ -26,7 +29,7 @@ export async function POST(req: NextRequest) {
        - list: 정보 요약이나 팁을 항목별로 제시
        - table: 비교 또는 정리용 표 (예: 가격 비교, 장단점 비교 등)
        - button: CTA 버튼 (예: 구매하러 가기, 관련 글 보기)
-       - link: 참고 링크 (예: “공식 사이트 보기”)
+       - link: 참고 링크 (예: "공식 사이트 보기")
     
     6. 각 section은 목적이 분명해야 하며 다음과 같은 내용을 담습니다:
     
@@ -250,14 +253,16 @@ export async function POST(req: NextRequest) {
     };
 
     await postWordpressArticle({
-      wpUrl: "https://m3088787.mycafe24.com",
-      wpId: "m3088787",
-      wpApplicationPw: "hONc Hojo dlsv EfFd AUHd dqwk",
+      wpUrl,
+      wpId,
+      wpApplicationPw,
       articleInfo: articleInfo as WordpressArticleInfoType,
     });
 
     return NextResponse.json(articleInfo, { status: 201 });
   } catch (error) {
-    return NextResponse.json(error, { status: 500 });
+    console.log(error);
+    const errorMessage = error instanceof Error ? error.message : "알 수 없는 에러";
+    return NextResponse.json(errorMessage, { status: 500 });
   }
 }
