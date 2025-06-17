@@ -1,24 +1,31 @@
 import api from "@/lib/apiClient";
 import { useAutoUploadStore } from "@/store/autopress/AutoUpload";
 import { Button } from "@mui/material";
-import React, { useEffect, useCallback } from "react";
+import axios, { CancelTokenSource } from "axios";
+import React, { useCallback, useEffect, useState } from "react";
 
 const AutoUploadButton = () => {
   const { isAutoUploadRunning, setIsAutoUploadRunning } = useAutoUploadStore();
-
-  async function handleIsAutoUploadRunning() {
-    setIsAutoUploadRunning(!isAutoUploadRunning);
-  }
+  const [currentApiSource, setCurrentApiSource] = useState<CancelTokenSource>();
 
   ////////// 게시물 업로드
   const articleUpload = useCallback(async () => {
     try {
-      const response = await api.post("/autopress/articles", {
-        wpUrl: "https://m3088787.mycafe24.com",
-        wpId: "m3088787",
-        wpApplicationPw: "hONc Hojo dlsv EfFd AUHd dqwk",
-        category: "random",
-      });
+      const source = axios.CancelToken.source();
+      setCurrentApiSource(source);
+
+      const response = await api.post(
+        "/autopress/articles",
+        {
+          wpUrl: "https://m3088787.mycafe24.com",
+          wpId: "m3088787",
+          wpApplicationPw: "hONc Hojo dlsv EfFd AUHd dqwk",
+          category: "random",
+        },
+        {
+          cancelToken: source.token,
+        }
+      );
 
       return response;
     } catch (error) {
@@ -28,19 +35,39 @@ const AutoUploadButton = () => {
     }
   }, [setIsAutoUploadRunning]);
 
-  async function articleUploadLoop() {
-    try {
-      await articleUpload();
-      setTimeout(articleUploadLoop, 3 * 1000);
-    } catch {
-      return;
+  ////////// 게시물 업로드 반복
+  const articleUploadLoop = useCallback(async () => {
+    await articleUpload();
+    setTimeout(articleUploadLoop, 3 * 1000);
+  }, [articleUpload]);
+
+  ////////// API 요청 취소
+  const cancelCurrentApi = useCallback(() => {
+    currentApiSource?.cancel("API 요청 취소");
+    setCurrentApiSource(undefined);
+  }, [currentApiSource]);
+
+  ////////// 시작 버튼 클릭
+  const handleUploadStartButtonClick = () => {
+    setIsAutoUploadRunning(!isAutoUploadRunning);
+  };
+
+  ////////// 자동 업로드 상태 변경 시
+  useEffect(() => {
+    cancelCurrentApi();
+
+    if (isAutoUploadRunning) {
+      articleUploadLoop();
     }
-  }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAutoUploadRunning]);
 
   return (
-    <Button variant="contained" color="primary" onClick={articleUploadLoop}>
-      {isAutoUploadRunning ? "중지" : "업로드 시작"}
-    </Button>
+    <>
+      <Button variant="contained" color="primary" onClick={handleUploadStartButtonClick}>
+        {isAutoUploadRunning ? "중지" : "업로드 시작"}
+      </Button>
+    </>
   );
 };
 
