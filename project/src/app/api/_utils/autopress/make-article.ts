@@ -11,7 +11,7 @@ export const makeSectionTitleHtml = (title: string) => {
 
 ////////// 섹션 이미지 HTML 생성
 export const makeSectionImgHtml = async (imageKeyword: string) => {
-  const imgLink = await searchImage(imageKeyword);
+  const imgLink = await searchImage(imageKeyword.split(" ")[0]);
   return `<img src="${imgLink}" alt="${imageKeyword}" class="custom-section-img"/>`;
 };
 
@@ -183,7 +183,7 @@ export const extractContentEncoded = async (category: ExtractContentEncodedParam
     "sports",
     "weather",
   ];
-  
+
   // random 카테고리일 경우 랜덤하게 카테고리 선택
   const selectedCategory = category === "random" ? categoryList[getRandomInt(0, categoryList.length - 1)] : category;
 
