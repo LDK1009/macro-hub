@@ -2,6 +2,7 @@ import { ArticleBlockType, ArticleSectionType } from "@/types/autopress/block";
 import { searchImage } from "@/app/api/_utils/common/image";
 import axios from "axios";
 import * as cheerio from "cheerio";
+import { getRandomInt } from "@/utils/random";
 
 ////////// 섹션 타이틀 HTML 생성
 export const makeSectionTitleHtml = (title: string) => {
@@ -154,19 +155,76 @@ export const makeContentHtml = async (gptResponse: { title: string; sections: Ar
 };
 
 ////////// 뉴스 콘텐츠 추출
-export const extractContentEncoded = async () => {
-  const response = await axios.get("https://www.yonhapnewstv.co.kr/category/news/politics/feed/");
+export type ExtractContentEncodedParamsType =
+  | "random"
+  | "latest"
+  | "headlines"
+  | "politics"
+  | "economy"
+  | "society"
+  | "local"
+  | "international"
+  | "culture"
+  | "sports"
+  | "weather";
+
+export const extractContentEncoded = async (category: ExtractContentEncodedParamsType) => {
+  let response;
+
+  const categoryList = [
+    "latest",
+    "headlines",
+    "politics",
+    "economy",
+    "society",
+    "local",
+    "international",
+    "culture",
+    "sports",
+    "weather",
+  ];
+  const finalCategory = category === "random" ? categoryList[getRandomInt(0, categoryList.length - 1)] : category;
+
+  switch (finalCategory) {
+    case "latest":
+      response = await axios.get("https://www.yonhapnewstv.co.kr/browse/feed/");
+      break;
+    case "headlines":
+      response = await axios.get("https://www.yonhapnewstv.co.kr/category/news/headline/feed/");
+      break;
+    case "politics":
+      response = await axios.get("https://www.yonhapnewstv.co.kr/category/news/politics/feed/");
+      break;
+    case "economy":
+      response = await axios.get("https://www.yonhapnewstv.co.kr/category/news/economy/feed/");
+      break;
+    case "society":
+      response = await axios.get("https://www.yonhapnewstv.co.kr/category/news/society/feed/");
+      break;
+    case "local":
+      response = await axios.get("https://www.yonhapnewstv.co.kr/category/news/local/feed/");
+      break;
+    case "international":
+      response = await axios.get("https://www.yonhapnewstv.co.kr/category/news/international/feed/");
+      break;
+    case "culture":
+      response = await axios.get("https://www.yonhapnewstv.co.kr/category/news/culture/feed/");
+      break;
+    case "sports":
+      response = await axios.get("https://www.yonhapnewstv.co.kr/category/news/sports/feed/");
+      break;
+    case "weather":
+      response = await axios.get("https://www.yonhapnewstv.co.kr/category/news/weather/feed/");
+      break;
+    default:
+      throw new Error("올바르지 않은 카테고리입니다.");
+  }
+
   const $ = cheerio.load(response.data, {
     xmlMode: true,
   });
 
-  // 모든 content:encoded 태그를 찾아서 처리
-  const contents = $("content\\:encoded")
-    .map((_, element) => {
-      return $(element).text();
-    })
-    .get();
+  const contents = $("content\\:encoded").eq(0).text();
 
-  // 연속된 공백 제거 및 줄바꿈 정리
   return contents;
 };

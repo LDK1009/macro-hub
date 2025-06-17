@@ -9,6 +9,7 @@ const AutoUploadButton = () => {
         wpUrl: "https://m3088787.mycafe24.com",
         wpId: "m3088787",
         wpApplicationPw: "hONc Hojo dlsv EfFd AUHd dqwk",
+        category: "latest",
       });
 
       console.log(response.data);

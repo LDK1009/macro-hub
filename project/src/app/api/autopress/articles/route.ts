@@ -1,18 +1,32 @@
 import { NextRequest, NextResponse } from "next/server";
-import { extractContentEncoded, makeContentHtml } from "@/app/api/_utils/autopress/make-article";
-import { postWordpressArticle, validateWordpressUser, WordpressArticleInfoType } from "@/app/api/_utils/common/wordpress";
+import {
+  extractContentEncoded,
+  ExtractContentEncodedParamsType,
+  makeContentHtml,
+} from "@/app/api/_utils/autopress/make-article";
+import {
+  postWordpressArticle,
+  validateWordpressUser,
+  WordpressArticleInfoType,
+} from "@/app/api/_utils/common/wordpress";
 import { openai } from "@/app/api/_lib/openAi";
 
-
 ////////// POST
+type PostBodyType = {
+  wpUrl: string;
+  wpId: string;
+  wpApplicationPw: string;
+  category: ExtractContentEncodedParamsType;
+};
+
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
-    const { wpUrl, wpId, wpApplicationPw } = body;
+    const body: PostBodyType = await req.json();
+    const { wpUrl, wpId, wpApplicationPw, category } = body;
 
     await validateWordpressUser({ wpUrl, wpId, wpApplicationPw });
 
-    const newsContent = await extractContentEncoded();
+    const newsContent = await extractContentEncoded(category as ExtractContentEncodedParamsType);
 
     // 시스템 프롬프트
     const articleSystemPrompt = `
@@ -233,7 +247,7 @@ export async function POST(req: NextRequest) {
         },
         {
           role: "user",
-          content: `${newsContent[0]} 위 내용을 기반으로 글 작성해줘, 사람들이 모를것 같은 용어는 꼭 설명해줘}`,
+          content: `${newsContent} 위 내용을 기반으로 글 작성해줘, 사람들이 모를것 같은 용어는 꼭 설명해줘}`,
         },
       ],
       response_format: { type: "json_object" },

@@ -3,11 +3,7 @@
 import AutoUploadButton from "./container/AutoUploadButton";
 
 const AutopressContainer = () => {
-  return (
-    <div>
-      <AutoUploadButton />
-    </div>
-  );
+  return <AutoUploadButton />;
 };
 
 export default AutopressContainer;
