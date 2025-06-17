@@ -183,9 +183,11 @@ export const extractContentEncoded = async (category: ExtractContentEncodedParam
     "sports",
     "weather",
   ];
-  const finalCategory = category === "random" ? categoryList[getRandomInt(0, categoryList.length - 1)] : category;
+  
+  // random 카테고리일 경우 랜덤하게 카테고리 선택
+  const selectedCategory = category === "random" ? categoryList[getRandomInt(0, categoryList.length - 1)] : category;
 
-  switch (finalCategory) {
+  switch (selectedCategory) {
     case "latest":
       response = await axios.get("https://www.yonhapnewstv.co.kr/browse/feed/");
       break;
