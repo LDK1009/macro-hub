@@ -1,7 +1,8 @@
 import api from "@/lib/apiClient";
 import { useAutoUploadStore } from "@/store/autopress/AutoUpload";
-import { Button } from "@mui/material";
+import { Button, styled } from "@mui/material";
 import axios, { CancelTokenSource } from "axios";
+import { enqueueSnackbar } from "notistack";
 import React, { useCallback, useEffect, useState } from "react";
 
 const AutoUploadButton = () => {
@@ -35,6 +36,7 @@ const AutoUploadButton = () => {
     } catch (error) {
       console.error("게시물 업로드 오류:", error);
       setIsAutoUploadRunning(false);
+      enqueueSnackbar("자동 업로드 실패", { variant: "error" });
       throw new Error("게시물 업로드 오류");
     }
   }, [setIsAutoUploadRunning, addUploadedArticle]);
@@ -68,11 +70,20 @@ const AutoUploadButton = () => {
 
   return (
     <>
-      <Button variant="contained" color="primary" onClick={handleUploadStartButtonClick}>
+      <StyledButton
+        variant="contained"
+        color={isAutoUploadRunning ? "error" : "primary"}
+        onClick={handleUploadStartButtonClick}
+      >
         {isAutoUploadRunning ? "중지" : "업로드 시작"}
-      </Button>
+      </StyledButton>
     </>
   );
 };
 
 export default AutoUploadButton;
+
+const StyledButton = styled(Button)`
+  height: 50px;
+  font-size:20px;
+`;
