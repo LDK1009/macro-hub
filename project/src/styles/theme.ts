@@ -40,14 +40,14 @@ declare module "@mui/material/styles" {
 export const muiTheme = createTheme({
   palette: {
     primary: {
-      main: "#4CAF50",   // 메인그린 (성장, 협력, 신뢰)
-      light: "#81C784",
-      dark: "#388E3C",
+      main: "rgba(00, 10, 9, 1.0)",
+      dark: "rgba(00, 10, 9, 0.7)",
+      light: "rgba(00, 10, 9, 0.3)",
     },
     secondary: {
-      main: "#FFC107",   // 서브옐로우 (에너지, 교류, 활성화)
-      light: "#FFD54F",
-      dark: "#FFA000",
+      main: "rgba(84, 25, 252, 1.0)",
+      dark: "rgba(84, 25, 252, 0.7)",
+      light: "rgba(84, 25, 252, 0.3)",
     },
     error: {
       main: "#F44336",
@@ -74,13 +74,13 @@ export const muiTheme = createTheme({
       900: "#212121",
     },
     background: {
-      default: "#F9FFF9",  // 연한 민트 배경
-      paper: "#FFFFFF",
+      default: "#FFFFFF",
+      paper: "rgba(255, 245, 246, 1.0)",
     },
     text: {
-      primary: "#212121",
-      secondary: "#757575",
-      disabled: "rgba(0, 0, 0, 0.38)",
+      primary: "#000000",
+      secondary: "#777777",
+      disabled: "rgba(0, 0, 0, 0.5)",
       white: "#FFFFFF",
     },
   },
@@ -109,13 +109,13 @@ export const muiTheme = createTheme({
     MuiButton: {
       styleOverrides: {
         root: {
-          '&:hover': {
-            color: 'inherit',
+          "&:hover": {
+            color: "inherit",
           },
         },
         contained: {
-          '&:hover': {
-            color: 'white',
+          "&:hover": {
+            color: "white",
           },
         },
       },
