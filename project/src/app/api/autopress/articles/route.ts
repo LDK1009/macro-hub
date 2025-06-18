@@ -273,7 +273,7 @@ export async function POST(req: NextRequest) {
       articleInfo: articleInfo as WordpressArticleInfoType,
     });
 
-    return NextResponse.json(articleInfo, { status: 201 });
+    return NextResponse.json(articleInfo.title, { status: 201 });
   } catch (error) {
     console.log(error);
     const errorMessage = error instanceof Error ? error.message : "알 수 없는 에러";

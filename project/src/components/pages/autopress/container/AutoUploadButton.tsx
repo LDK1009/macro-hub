@@ -5,7 +5,7 @@ import axios, { CancelTokenSource } from "axios";
 import React, { useCallback, useEffect, useState } from "react";
 
 const AutoUploadButton = () => {
-  const { isAutoUploadRunning, setIsAutoUploadRunning } = useAutoUploadStore();
+  const { isAutoUploadRunning, setIsAutoUploadRunning, addUploadedArticle } = useAutoUploadStore();
   const [currentApiSource, setCurrentApiSource] = useState<CancelTokenSource>();
 
   ////////// 게시물 업로드
@@ -14,6 +14,7 @@ const AutoUploadButton = () => {
       const source = axios.CancelToken.source();
       setCurrentApiSource(source);
 
+      // API 요청
       const response = await api.post(
         "/autopress/articles",
         {
@@ -27,13 +28,16 @@ const AutoUploadButton = () => {
         }
       );
 
+      // 업로드 완료 목록에 추가
+      addUploadedArticle(response.data);
+
       return response;
     } catch (error) {
       console.error("게시물 업로드 오류:", error);
       setIsAutoUploadRunning(false);
       throw new Error("게시물 업로드 오류");
     }
-  }, [setIsAutoUploadRunning]);
+  }, [setIsAutoUploadRunning, addUploadedArticle]);
 
   ////////// 게시물 업로드 반복
   const articleUploadLoop = useCallback(async () => {
