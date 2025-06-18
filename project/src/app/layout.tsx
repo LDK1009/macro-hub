@@ -9,13 +9,14 @@ import Loading from "@/components/common/Loading";
 // SEO 메타데이터
 export const metadata: Metadata = {
   manifest: "/manifest.json",
-  title: `${templateInfo.name}`,
-  description: "오늘, 너를 위한 한 장의 페이지",
-  keywords: "생일, 기념일, 감성, 선물, 메시지, 카드, 템플릿, 나만의 페이지",
+  title: templateInfo.name,
+  description: templateInfo.description,
+  keywords:
+    "매크로, 자동화, 자동 댓글, 자동 포스팅, 자동 삭제, 반복 작업, 구독형 서비스, 매크로 툴, 웹 자동화, 업무 자동화",
   openGraph: {
-    title: `${templateInfo.name}`,
-    description: "오늘, 너를 위한 한 장의 페이지",
-    url: `${templateInfo.link}`,
+    title: templateInfo.name,
+    description: templateInfo.description,
+    url: templateInfo.link,
     images: [{ url: "/img/og.png", width: 1200, height: 630, alt: "og-image" }],
     type: "website",
   },
