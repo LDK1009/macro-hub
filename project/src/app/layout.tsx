@@ -1,4 +1,4 @@
-import ThemeProviderWrapper from "@/styles/ThemeProviderWrapper";
+  import ThemeProviderWrapper from "@/styles/ThemeProviderWrapper";
 import type { Metadata } from "next";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
 import ClientSnackbarProvider from "@/lib/ClientSnackbarProvider";

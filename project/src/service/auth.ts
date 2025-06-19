@@ -1,29 +1,7 @@
-/**
- * [설명]
- * 이 파일은 사용자 인증 관련 기능을 제공하는 서비스 모듈입니다.
- * Supabase 인증 서비스를 활용하여 로그인, 로그아웃, 회원탈퇴 및 사용자 정보 조회 기능을 제공합니다.
- * 주로 카카오 OAuth를 통한 소셜 로그인을 지원합니다.
- * 
- * [사용 방법]
- * 다른 파일에서 다음과 같이 가져와 사용할 수 있습니다:
- * import { signIn, signOut, getCurrentUser, ... } from 'path/to/auth';
- * 
- * [예시 코드]
- * > 로그인
- * const response = await signIn();
- * > 로그아웃
- * await signOut();
- * > 현재 사용자 정보 가져오기
- * const { data, error } = await getCurrentUser();
- * 
- * [참고자료]
- * Supabase 인증 문서: https://supabase.com/docs/guides/auth
- */
-
-//////////////////////////////////////// 코드 시작 ////////////////////////////////////////
-
 import api from "@/lib/apiClient";
 import { supabase } from "@/lib/supabaseClient";
+import { UserType } from "@/types/auth/auth";
+import { addDays, isAfter } from "date-fns";
 
 ////////// 로그인
 export async function signIn() {
@@ -45,7 +23,7 @@ export async function signOut() {
 }
 
 ////////// 회원탈퇴
-export async function deleteUser(uid : string) {
+export async function deleteUser(uid: string) {
   const response = await api.delete(`/users?uid=${uid}`);
 
   return response.data;
@@ -92,3 +70,93 @@ export async function getCurrentUserEmail() {
 
   return response;
 }
+
+////////// 유저 생성
+export async function createUser() {
+  try {
+    // 로그인 상태 확인
+    const isSignIn = await getCurrentUser();
+
+    if (!isSignIn) {
+      return { data: "로그인 상태가 아닙니다.", error: null };
+    }
+
+    // 현재 로그인한 유저 정보 가져오기
+    const {
+      data: { user: userData },
+    } = await getCurrentUser();
+
+    // 현재 로그인한 유저 정보 비구조화
+    const { id, email, created_at } = userData || {};
+
+    // 이미 회원가입한 유저인지 체크
+    const { data: isExistUserList } = await supabase.from("users").select("*").eq("uid", id);
+
+    // 이미 회원가입한 유저라면 종료
+    if (isExistUserList && isExistUserList.length > 0) {
+      console.log("이미 회원가입한 유저입니다.", isExistUserList);
+      return { data: "이미 회원가입한 유저입니다.", error: null };
+    }
+
+    // 유저 정보 없으면 종료
+    if (!userData || !id || !created_at) {
+      throw new Error("유저 정보 없음");
+    }
+
+    // 무료 구독권 날짜 계산
+    const createDate = new Date(created_at);
+    const firstTimeSubscriber = addDays(createDate, 7);
+
+    // 유저 정보 생성
+    const createUserData: UserType = {
+      uid: id,
+      email: email,
+      subscription_period: firstTimeSubscriber,
+      created_at: createDate,
+    };
+
+    // 유저 정보 생성
+    await supabase.from("users").insert(createUserData);
+
+    return { data: "유저 생성 성공", error: null };
+  } catch {
+    throw new Error("유저 생성 실패");
+  }
+}
+
+////////// 구독 여부 확인
+export async function readIsUserSubscribed() {
+  try {
+    ///// 현재 로그인한 유저의 uid 가져오기
+    const { data: uid } = await getCurrentUserUID();
+
+    if (!uid) {
+      throw new Error("유저 uid 없음");
+    }
+
+    ///// UID와 일치하는 유저의 구독 기간 가져오기
+    const { data: userSubscriptionData } = await supabase
+      .from("users")
+      .select("subscription_period")
+      .eq("uid", uid)
+      .single();
+
+    // 구독 기간 비구조화
+    const subscriptionPeriod = userSubscriptionData?.subscription_period;
+
+    // 구독 기간 없으면 함수 종료
+    if (!subscriptionPeriod) {
+      throw new Error("구독 기간을 찾을 수 없습니다.");
+    }
+
+    ///// 구독 만료 여부 검증하기
+    const subscriptionPeriodDate = new Date(subscriptionPeriod);
+    const isSubscribeLived = isAfter(subscriptionPeriodDate, new Date());
+
+    // 구독 만료 여부 반환
+    return isSubscribeLived;
+  } catch {
+    throw new Error("구독 여부 확인 실패");
+  }
+}
+

@@ -1,4 +1,5 @@
 import api from "@/lib/apiClient";
+import { readIsUserSubscribed } from "@/service/auth";
 import { useAutoUploadStore } from "@/store/autopress/AutoUpload";
 import { Button, styled } from "@mui/material";
 import axios, { CancelTokenSource } from "axios";
@@ -54,7 +55,14 @@ const AutoUploadButton = () => {
   }, [currentApiSource]);
 
   ////////// 시작 버튼 클릭
-  const handleUploadStartButtonClick = () => {
+  const handleUploadStartButtonClick = async () => {
+    const isUserSubscribed = await readIsUserSubscribed();
+
+    if (!isUserSubscribed) {
+      enqueueSnackbar("구독권 구매 후 이용 가능합니다.", { variant: "error" });
+      return;
+    }
+
     setIsAutoUploadRunning(!isAutoUploadRunning);
   };
 
