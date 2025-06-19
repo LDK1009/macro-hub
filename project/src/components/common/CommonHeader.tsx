@@ -19,9 +19,15 @@ import {
 } from "@mui/material";
 import { mixinFlex } from "@/styles/mixins";
 import { useAuthStore } from "@/store";
-import { GavelRounded, PersonOutline, Menu as MenuIcon, ListAlt, AddCircleOutline } from "@mui/icons-material";
-import { templateInfo } from "@/utils/templateInfo";
+import {
+  PersonOutline,
+  Menu as MenuIcon,
+  SupportAgentOutlined,
+  SettingsOutlined,
+  CreditCardOutlined,
+} from "@mui/icons-material";
 import { useLoadingRouter } from "@/hooks/useLoadingRouter";
+import Image from "next/image";
 
 /**
  * 헤더 컴포넌트 - 웹사이트의 상단 네비게이션 바를 표시합니다.
@@ -47,8 +53,9 @@ const CommonHeader = () => {
   /////////////////////////////// Variables ///////////////////////////////
   const drawerWidth = 250;
   const navItems = [
-    { title: "메뉴1", path: "/", icon: <ListAlt /> },
-    { title: "메뉴2", path: "/", icon: <AddCircleOutline /> },
+    { title: "매크로", path: "/hub", icon: <SettingsOutlined /> },
+    { title: "요금제", path: "/billing", icon: <CreditCardOutlined /> },
+    { title: "고객지원", path: "/support", icon: <SupportAgentOutlined /> },
     user.isSignIn
       ? { title: "마이페이지", path: "/my-page", icon: <PersonOutline /> }
       : { title: "로그인", path: "/auth/sign-in", icon: <PersonOutline /> },
@@ -63,11 +70,10 @@ const CommonHeader = () => {
       <StyledToolbar>
         {/* 로고 섹션 */}
         <LogoContainer onClick={() => navigateWithLoading("/")}>
-          <IconButton color="inherit">
-            <GavelRounded />
-          </IconButton>
+          <Image src="/img/logo-192.png" alt="logo" width={32} height={32} />
+
           <Typography variant="h6" sx={{ textDecoration: "none", color: "inherit" }}>
-            {templateInfo.name}
+            MacroHub
           </Typography>
         </LogoContainer>
 
@@ -105,12 +111,9 @@ const CommonHeader = () => {
     return (
       <Box onClick={handleDrawerToggle}>
         {/* 헤더 */}
-        <Grid2 container justifyContent="center" alignItems="center">
-          <IconButton onClick={() => navigateWithLoading("/")} color="primary">
-            <GavelRounded />
-          </IconButton>
+        <Grid2 container onClick={() => navigateWithLoading("/")} justifyContent="center" alignItems="center">
           <Typography variant="h6" sx={{ my: 2 }} color="primary">
-            {templateInfo.name}
+            MacroHub
           </Typography>
         </Grid2>
         {/* 구분선 */}
@@ -165,7 +168,7 @@ export default CommonHeader;
 
 /////////////////////////////// 스타일 컴포넌트 ///////////////////////////////
 const StyledAppBar = styled(AppBar)`
-  background-color: ${({ theme }) => theme.palette.background.paper};
+  background-color: ${({ theme }) => theme.palette.background.default};
   color: ${({ theme }) => theme.palette.primary.main};
   border-bottom: 1px solid ${({ theme }) => theme.palette.gray[200]};
 `;
@@ -183,4 +186,6 @@ const LogoContainer = styled(Box)`
   justify-content: flex-start;
   gap: 8px;
   width: 100%;
+
+  cursor: pointer;
 `;

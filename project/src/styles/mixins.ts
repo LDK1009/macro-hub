@@ -25,7 +25,7 @@ export const mixinContainer = () => css`
   min-height: 100vh;
   width: 100%;
   margin: 0 auto;
-  padding: 80px 16px;
+  padding: 64px 16px;
 
   // ~ 모바일
   @media (min-width: 0px) and (max-width: ${breakpoint.mobile}px) {
@@ -49,7 +49,7 @@ export const mixinContainer = () => css`
 
   /* 모바일 화면에서는 헤더 높이가 56px로 줄어듦 */
   @media (max-width: ${breakpoint.mobile - 1}px) {
-    padding: 70px 16px;
+    padding: 56px 16px;
   }
 `;
 
