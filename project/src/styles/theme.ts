@@ -1,9 +1,9 @@
-import { createTheme } from "@mui/material/styles";
+import { createTheme, Theme } from "@mui/material/styles";
 
 declare module "@mui/material/styles" {
   interface Palette {
-    gray: {
-      50: string;
+    black: {
+      0: string;
       100: string;
       200: string;
       300: string;
@@ -11,14 +11,19 @@ declare module "@mui/material/styles" {
       500: string;
       600: string;
       700: string;
-      800: string;
-      900: string;
+    };
+    secondaryVariable: {
+      [key: string]: {
+        dark: string;
+        main: string;
+        light: string;
+      };
     };
   }
 
   interface PaletteOptions {
-    gray?: {
-      50: string;
+    black?: {
+      0: string;
       100: string;
       200: string;
       300: string;
@@ -26,13 +31,34 @@ declare module "@mui/material/styles" {
       500: string;
       600: string;
       700: string;
-      800: string;
-      900: string;
     };
+    secondaryVariable: {
+      [key: string]: {
+        dark: string;
+        main: string;
+        light: string;
+        contrastText: string;
+      };
+    };
+  }
+
+  // 배경색 타입 정의
+  interface TypeBackground {
+    default: string;
+    paper: string;
+    0: string;
+    100: string;
+    200: string;
+    300: string;
+    400: string;
+    500: string;
+    600: string;
+    700: string;
   }
 
   interface TypeText {
     white: string;
+    black: string;
   }
 }
 
@@ -40,84 +66,109 @@ declare module "@mui/material/styles" {
 export const muiTheme = createTheme({
   palette: {
     primary: {
-      main: "rgba(00, 10, 9, 1.0)",
-      dark: "rgba(00, 10, 9, 0.7)",
-      light: "rgba(00, 10, 9, 0.3)",
+      dark: "#222222",
+      main: "#444444",
+      light: "#666666",
+      contrastText: "#FFFFFF",
     },
+
     secondary: {
-      main: "rgba(84, 25, 252, 1.0)",
-      dark: "rgba(84, 25, 252, 0.7)",
-      light: "rgba(84, 25, 252, 0.3)",
+      dark: "#0000FF",
+      main: "#2222FF",
+      light: "#4444FF",
+      contrastText: "#FFFFFF",
     },
+
+    secondaryVariable: {
+      blue: {
+        dark: "#0A2FCC",
+        main: "#0D45FF",
+        light: "#567AFF",
+        contrastText: "#FFFFFF",
+      },
+      green: {
+        dark: "#00A650",
+        main: "#00FF84",
+        light: "#66FFC2",
+        contrastText: "#000000",
+      },
+      yellow: {
+        dark: "#C4A000",
+        main: "#FFD335",
+        light: "#FFE97F",
+        contrastText: "#000000",
+      },
+      pink: {
+        dark: "#D6006B",
+        main: "#FF2D95",
+        light: "#FF7DC2",
+        contrastText: "#000000",
+      },
+      purple: {
+        dark: "#7E57C2",
+        main: "#B388FF",
+        light: "#E0CFFF",
+        contrastText: "#000000",
+      },
+    },
+
     error: {
       main: "#F44336",
     },
+
     warning: {
       main: "#FF9800",
     },
+
     info: {
       main: "#2196F3",
     },
+
     success: {
       main: "#4CAF50",
     },
-    gray: {
-      50: "#FAFAFA",
-      100: "#F5F5F5",
-      200: "#EEEEEE",
-      300: "#E0E0E0",
-      400: "#BDBDBD",
-      500: "#9E9E9E",
-      600: "#757575",
-      700: "#616161",
-      800: "#424242",
-      900: "#212121",
+
+    black: {
+      0: "#ffffff",
+      100: "#CCCCCC",
+      200: "#AAAAAA",
+      300: "#888888",
+      400: "#666666",
+      500: "#444444",
+      600: "#222222",
+      700: "#000000",
     },
+
     background: {
-      default: "#FFFFFF",
-      paper: "rgba(255, 245, 246, 1.0)",
+      default: "#000000",
+      paper: "#666666",
+      0: "#ffffff",
+      100: "#CCCCCC",
+      200: "#AAAAAA",
+      300: "#888888",
+      400: "#666666",
+      500: "#444444",
+      600: "#222222",
+      700: "#000000",
     },
+
     text: {
-      primary: "#000000",
-      secondary: "#777777",
-      disabled: "rgba(0, 0, 0, 0.5)",
+      primary: "#FFFFFF",
+      secondary: "#AAAAAA",
+      disabled: "#666666",
       white: "#FFFFFF",
-    },
-  },
-  typography: {
-    fontFamily: "'Pretendard-Regular', 'Noto Sans KR', sans-serif",
-    h1: {
-      fontWeight: 700,
-    },
-    h2: {
-      fontWeight: 700,
-    },
-    h3: {
-      fontWeight: 600,
-    },
-    h4: {
-      fontWeight: 600,
-    },
-    h5: {
-      fontWeight: 500,
-    },
-    h6: {
-      fontWeight: 500,
+      black: "#000000",
     },
   },
   components: {
-    MuiButton: {
+    MuiInputLabel: {
       styleOverrides: {
-        root: {
-          "&:hover": {
-            color: "inherit",
+        root: ({ theme }: { theme: Theme }) => ({
+          color: theme.palette.text.secondary,
+          "&.Mui-focused": {
+            color: theme.palette.text.primary,
           },
-        },
-        contained: {
-          "&:hover": {
-            color: "white",
-          },
-        },
+        }),
       },
     },
   },
