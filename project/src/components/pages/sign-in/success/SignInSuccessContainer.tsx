@@ -8,11 +8,10 @@ import { CottageOutlined } from "@mui/icons-material";
 import { createUser, getCurrentUser } from "@/service/auth";
 import { enqueueSnackbar } from "notistack";
 import { useAuthStore } from "@/store";
-import Loading from "@/components/common/Loading";
 import { useLoadingStore } from "@/store/ui/loadingStore";
 
 const SignInSuccessContainer = () => {
-  const { isLoading, setIsLoading } = useLoadingStore();
+  const { setIsLoading } = useLoadingStore();
   // Store
   const { setUser } = useAuthStore();
 
@@ -48,29 +47,25 @@ const SignInSuccessContainer = () => {
 
   return (
     <>
-      {isLoading ? (
-        <Loading />
-      ) : (
-        <Container>
-          <TextWrap>
-            <HeadingText variant="h5" fontWeight={"bold"}>
-              로그인 완료!
-            </HeadingText>
-            <BodyText variant="body2" align="center">
-              로그인이 성공적으로 완료되었습니다.
-              <br />
-              이제 모든 서비스를 이용하실 수 있습니다.
-            </BodyText>
-          </TextWrap>
+      <Container>
+        <TextWrap>
+          <HeadingText variant="h5" fontWeight={"bold"}>
+            로그인 완료!
+          </HeadingText>
+          <BodyText variant="body2" align="center">
+            로그인이 성공적으로 완료되었습니다.
+            <br />
+            이제 모든 서비스를 이용하실 수 있습니다.
+          </BodyText>
+        </TextWrap>
 
-          <Img src={"/img/logo-512.png"} alt="" width={200} height={200} />
-          <ButtonWrap>
-            <HomeButton href="/" variant="contained" startIcon={<CottageOutlined />}>
-              홈으로
-            </HomeButton>
-          </ButtonWrap>
-        </Container>
-      )}
+        <Img src={"/img/logo-512.png"} alt="" width={200} height={200} />
+        <ButtonWrap>
+          <HomeButton href="/" variant="contained" startIcon={<CottageOutlined />}>
+            홈으로
+          </HomeButton>
+        </ButtonWrap>
+      </Container>
     </>
   );
 };
