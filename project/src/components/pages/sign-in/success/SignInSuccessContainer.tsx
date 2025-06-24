@@ -44,7 +44,7 @@ const SignInSuccessContainer = () => {
     }
 
     initializeUser();
-  }, []);
+  }, [setIsLoading]);
 
   return (
     <>
