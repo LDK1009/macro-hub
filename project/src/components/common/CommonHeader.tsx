@@ -53,9 +53,9 @@ const CommonHeader = () => {
   /////////////////////////////// Variables ///////////////////////////////
   const drawerWidth = 250;
   const navItems = [
-    { title: "매크로", path: "/hub", icon: <SettingsOutlined /> },
-    { title: "요금제", path: "/billing", icon: <CreditCardOutlined /> },
-    { title: "고객지원", path: "/support", icon: <SupportAgentOutlined /> },
+    { title: "매크로", path: "/", icon: <SettingsOutlined /> },
+    { title: "요금제", path: "/", icon: <CreditCardOutlined /> },
+    { title: "고객지원", path: "/", icon: <SupportAgentOutlined /> },
     user.isSignIn
       ? { title: "마이페이지", path: "/my-page", icon: <PersonOutline /> }
       : { title: "로그인", path: "/auth/sign-in", icon: <PersonOutline /> },
