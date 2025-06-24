@@ -1,4 +1,4 @@
-  import ThemeProviderWrapper from "@/styles/ThemeProviderWrapper";
+import ThemeProviderWrapper from "@/styles/ThemeProviderWrapper";
 import type { Metadata } from "next";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
 import ClientSnackbarProvider from "@/lib/ClientSnackbarProvider";
@@ -49,11 +49,11 @@ export default function RootLayout({
             {/* 스낵바 */}
             <ClientSnackbarProvider />
             {/* 헤더 */}
-            <CommonHeader />
-            {/* 로딩 */}
             <Suspense fallback={<Loading />}>
-              <Loading />
+              <CommonHeader />
             </Suspense>
+            {/* 로딩 */}
+            <Loading />
             {/* 페이지 컨텐츠 */}
             {children}
             {/* 바텀 내비게이션 */}
