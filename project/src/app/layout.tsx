@@ -6,6 +6,7 @@ import GlobalStyles from "@/styles/GlobalStyles";
 import { templateInfo } from "@/utils/templateInfo";
 import Loading from "@/components/common/Loading";
 import CommonHeader from "@/components/common/CommonHeader";
+import { Suspense } from "react";
 
 // SEO 메타데이터
 export const metadata: Metadata = {
@@ -50,7 +51,9 @@ export default function RootLayout({
             {/* 헤더 */}
             <CommonHeader />
             {/* 로딩 */}
-            <Loading />
+            <Suspense fallback={<Loading />}>
+              <Loading />
+            </Suspense>
             {/* 페이지 컨텐츠 */}
             {children}
             {/* 바텀 내비게이션 */}
