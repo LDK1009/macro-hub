@@ -1,10 +1,10 @@
 import { useAutoUploadStore } from "@/store/autopress/AutoUpload";
 import { mixinEllipsis, mixinFlex, mixinHideScrollbar } from "@/styles/mixins";
-import { Grid2, keyframes, Stack, styled, Typography } from "@mui/material";
+import { Box, CircularProgress, keyframes, Stack, styled, Typography } from "@mui/material";
 import React, { useEffect, useRef } from "react";
 
 const UploadedArticle = () => {
-  const { uploadedArticleList } = useAutoUploadStore();
+  const { isAutoUploadRunning, uploadedArticleList } = useAutoUploadStore();
   const gridRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -15,16 +15,20 @@ const UploadedArticle = () => {
 
   return (
     <Container>
-      <Typography variant="h5">업로드 개수 : {uploadedArticleList.length}</Typography>
-      <GridContainer ref={gridRef} container spacing={2}>
+      {/* 게시물 목록 */}
+      <ArticleContainer ref={gridRef}>
         {uploadedArticleList.map((article, index) => (
-          <Grid2 key={index} size={6}>
-            <UploadedArticleItem key={index}>
-              <ArticleTitle>{article}</ArticleTitle>
-            </UploadedArticleItem>
-          </Grid2>
+          <UploadedArticleItem key={index}>
+            <ArticleTitle>{article}</ArticleTitle>
+          </UploadedArticleItem>
         ))}
-      </GridContainer>
+      </ArticleContainer>
+
+      {/* 게시물 개수 */}
+      <ArticleCountContainer>
+        {isAutoUploadRunning && <LoadingCircle />}
+        <ArticleCount variant="h5">{uploadedArticleList.length}</ArticleCount>
+      </ArticleCountContainer>
     </Container>
   );
 };
@@ -32,15 +36,17 @@ const UploadedArticle = () => {
 export default UploadedArticle;
 
 const Container = styled(Stack)`
+  position: relative;
   width: 100%;
   ${mixinFlex("column", "center", "center")};
-  row-gap:8px;
+  row-gap: 8px;
 `;
 
-const GridContainer = styled(Grid2)`
+const ArticleContainer = styled(Stack)`
   width: 100%;
   height: 500px;
   padding: 24px;
+  row-gap: 8px;
 
   border: 2px solid ${({ theme }) => theme.palette.primary.main};
   border-radius: 8px;
@@ -60,11 +66,9 @@ to {
   }
 `;
 
-const UploadedArticleItem = styled(Grid2)`
-  ${mixinFlex("column", "center", "center")}
+const UploadedArticleItem = styled(Box)`
   width: 100%;
-  height: 50px;
-  padding: 8px 16px;
+  padding: 16px;
 
   border: 1px solid ${({ theme }) => theme.palette.primary.light};
   border-radius: 8px;
@@ -74,5 +78,30 @@ const UploadedArticleItem = styled(Grid2)`
 `;
 
 const ArticleTitle = styled(Typography)`
+  text-align: center;
   ${mixinEllipsis()}
+`;
+
+const ArticleCountContainer = styled(Stack)`
+  ${mixinFlex("row", "center", "center")}
+  column-gap: 8px;
+
+  padding: 8px 16px;
+  border-radius: 8px;
+
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+
+  background-color: ${({ theme }) => theme.palette.background.default + "99"};
+`;
+
+const LoadingCircle = styled(CircularProgress)`
+  width: 24px !important;
+  height: 24px !important;
+`;
+
+const ArticleCount = styled(Typography)`
+  font-weight: bold;
+  color: ${({ theme }) => theme.palette.text.primary};
 `;

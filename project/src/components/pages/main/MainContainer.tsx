@@ -1,14 +1,19 @@
 "use client";
 
-import { mixinContainer } from "@/styles/mixins";
 import { Box, styled } from "@mui/material";
+import ImageBanner from "./container/ImageBanner";
 
 const MainContainer = () => {
-  return <Container>메인 페이지</Container>;
+  return (
+    <Container>
+      <ImageBanner />
+      메인 페이지
+    </Container>
+  );
 };
 
 export default MainContainer;
 
 const Container = styled(Box)`
-  ${mixinContainer}
+  padding-top: 64px;
 `;

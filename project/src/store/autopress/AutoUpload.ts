@@ -1,3 +1,4 @@
+import { ExtractContentEncodedParamsType } from "@/app/api/_utils/autopress/make-article";
 import { create } from "zustand";
 
 interface AutoUploadStoreType {
@@ -7,6 +8,9 @@ interface AutoUploadStoreType {
   uploadedArticleList: string[];
   setUploadedArticleList: (value: string[]) => void;
   addUploadedArticle: (value: string) => void;
+
+  category: ExtractContentEncodedParamsType;
+  setCategory: (value: ExtractContentEncodedParamsType) => void;
 }
 
 export const useAutoUploadStore = create<AutoUploadStoreType>((set) => ({
@@ -26,5 +30,12 @@ export const useAutoUploadStore = create<AutoUploadStoreType>((set) => ({
   addUploadedArticle: (value) =>
     set((state) => ({
       uploadedArticleList: [...state.uploadedArticleList, value],
+    })),
+
+  ////////// 카테고리
+  category: "random",
+  setCategory: (value) =>
+    set(() => ({
+      category: value,
     })),
 }));

@@ -1,8 +1,9 @@
 import { TextField, Button, Stack, styled } from "@mui/material";
-import React from "react";
+import React, { useEffect } from "react";
 import { enqueueSnackbar } from "notistack";
 import { HelpOutline } from "@mui/icons-material";
 import { useWordpressInfoStore } from "@/store/autopress/WordpressInfo";
+import { mixinMuiTextInputBorder } from "@/styles/mixins";
 
 const InputSection = () => {
   //////////////////////////////////////// 상태 ////////////////////////////////////////
@@ -20,14 +21,6 @@ const InputSection = () => {
     // URL 형식 검사
     const isValid = urlPattern.test(wpUrl);
 
-    // URL 형식 검사 결과 업데이트
-    if (wpUrl) {
-      // 마지막에 슬래시(/)로 끝나면 알림
-      if (wpUrl.endsWith("/")) {
-        enqueueSnackbar("URL 마지막에 슬래시(/)가 있습니다.", { variant: "warning" });
-      }
-    }
-
     return isValid;
   };
 
@@ -39,6 +32,17 @@ const InputSection = () => {
       enqueueSnackbar("워드프레스 URL을 입력해주세요.", { variant: "error" });
     }
   };
+
+  ////////// URL 형식 검사
+  useEffect(() => {
+    // URL 형식 검사 결과 업데이트
+    if (wpUrl) {
+      // 마지막에 슬래시(/)로 끝나면 알림
+      if (wpUrl.endsWith("/")) {
+        enqueueSnackbar("URL 마지막에 슬래시(/)가 있습니다.", { variant: "warning" });
+      }
+    }
+  }, [wpUrl]);
 
   //////////////////////////////////////// 렌더링 ////////////////////////////////////////
   return (
@@ -87,6 +91,7 @@ export default InputSection;
 const Container = styled(Stack)`
   width: 100%;
   row-gap: 16px;
+  color: ${({ theme }) => theme.palette.text.primary};
 `;
 
 const Header = styled(Stack)`
@@ -95,14 +100,18 @@ const Header = styled(Stack)`
 `;
 
 const HowToGetAppPwButton = styled(Button)`
+  color: ${({ theme }) => theme.palette.text.secondary};
+
   &:hover {
-    color: ${({ theme }) => theme.palette.primary.dark};
+    color: ${({ theme }) => theme.palette.text.primary};
   }
 `;
 
 const InputContainer = styled(Stack)`
   flex-direction: row;
   column-gap: 32px;
+
+  ${({ theme }) => mixinMuiTextInputBorder(theme)}
 `;
 
 const WpIdInput = styled(TextField)`

@@ -1,13 +1,16 @@
 import api from "@/lib/apiClient";
 import { readIsUserSubscribed } from "@/service/auth";
 import { useAutoUploadStore } from "@/store/autopress/AutoUpload";
+import { useWordpressInfoStore } from "@/store/autopress/WordpressInfo";
 import { Button, styled } from "@mui/material";
 import axios, { CancelTokenSource } from "axios";
 import { enqueueSnackbar } from "notistack";
 import React, { useCallback, useEffect, useState } from "react";
 
 const AutoUploadButton = () => {
-  const { isAutoUploadRunning, setIsAutoUploadRunning, addUploadedArticle } = useAutoUploadStore();
+  const { wpInfo } = useWordpressInfoStore();
+
+  const { isAutoUploadRunning, setIsAutoUploadRunning, addUploadedArticle, category } = useAutoUploadStore();
   const [currentApiSource, setCurrentApiSource] = useState<CancelTokenSource>();
 
   ////////// 게시물 업로드
@@ -20,10 +23,10 @@ const AutoUploadButton = () => {
       const response = await api.post(
         "/autopress/articles",
         {
-          wpUrl: "https://m3088787.mycafe24.com",
-          wpId: "m3088787",
-          wpApplicationPw: "hONc Hojo dlsv EfFd AUHd dqwk",
-          category: "random",
+          wpUrl: wpInfo.wpUrl,
+          wpId: wpInfo.wpId,
+          wpApplicationPw: wpInfo.wpApplicationPw,
+          category: category,
         },
         {
           cancelToken: source.token,
@@ -40,7 +43,7 @@ const AutoUploadButton = () => {
       enqueueSnackbar("자동 업로드 실패", { variant: "error" });
       throw new Error("게시물 업로드 오류");
     }
-  }, [setIsAutoUploadRunning, addUploadedArticle]);
+  }, [setIsAutoUploadRunning, addUploadedArticle, wpInfo, category]);
 
   ////////// 게시물 업로드 반복
   const articleUploadLoop = useCallback(async () => {
@@ -83,7 +86,7 @@ const AutoUploadButton = () => {
         color={isAutoUploadRunning ? "error" : "primary"}
         onClick={handleUploadStartButtonClick}
       >
-        {isAutoUploadRunning ? "중지" : "업로드 시작"}
+        {isAutoUploadRunning ? "❌ 중지" : "🚀 업로드 시작"}
       </StyledButton>
     </>
   );
@@ -93,5 +96,14 @@ export default AutoUploadButton;
 
 const StyledButton = styled(Button)`
   height: 50px;
-  font-size:20px;
+  font-size: 20px;
+
+  &.MuiButton-containedPrimary {
+    background-color: ${({ theme }) => theme.palette.secondaryVariable.blue.main};
+    color: ${({ theme }) => theme.palette.text.primary};
+
+    &:hover {
+      background-color: ${({ theme }) => theme.palette.secondary.dark};
+    }
+  }
 `;

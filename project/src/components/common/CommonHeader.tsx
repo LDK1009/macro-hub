@@ -169,8 +169,8 @@ export default CommonHeader;
 /////////////////////////////// 스타일 컴포넌트 ///////////////////////////////
 const StyledAppBar = styled(AppBar)`
   background-color: ${({ theme }) => theme.palette.background.default};
-  color: ${({ theme }) => theme.palette.primary.main};
-  border-bottom: 1px solid ${({ theme }) => theme.palette.gray[200]};
+  color: ${({ theme }) => theme.palette.text.primary};
+  border-bottom: 1px solid ${({ theme }) => theme.palette.primary.main};
 `;
 
 // 커스텀 Toolbar 스타일
