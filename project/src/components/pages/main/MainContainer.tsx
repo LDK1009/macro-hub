@@ -1,19 +1,22 @@
 "use client";
 
-import { Box, styled } from "@mui/material";
-import ImageBanner from "./container/ImageBanner";
+import { Stack, styled } from "@mui/material";
+import MacroItem from "./container/MacroItem";
+import { mixinFlex } from "@/styles/mixins";
 
 const MainContainer = () => {
   return (
     <Container>
-      <ImageBanner />
-      메인 페이지
+      <MacroItem />
     </Container>
   );
 };
 
 export default MainContainer;
 
-const Container = styled(Box)`
+const Container = styled(Stack)`
+  ${mixinFlex("column", "center", "center")}
+  width: 100%;
+  height: 100vh;
   padding-top: 64px;
 `;
