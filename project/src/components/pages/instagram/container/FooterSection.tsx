@@ -1,4 +1,4 @@
-import { Box, Typography, Link, Divider, styled } from "@mui/material";
+import { Box, Typography, Divider, styled } from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
 import { Shield, Email, Phone, Instagram, Twitter, YouTube } from "@mui/icons-material";
 
