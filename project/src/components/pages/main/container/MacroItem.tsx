@@ -3,12 +3,12 @@ import { mixinFlex } from "@/styles/mixins";
 import { Stack, styled, Typography } from "@mui/material";
 import React from "react";
 
-const MacroItem = () => {
+const MacroItem = ({name, link}:{name:string, link:string}) => {
   const { navigateWithLoading } = useLoadingRouter();
   return (
-    <Container onClick={() => navigateWithLoading("/autopress")}>
+    <Container onClick={() => navigateWithLoading(link)}>
       <Typography variant="h2" fontWeight={"bold"}>
-        ⚙ 오토프레스
+        {name}
       </Typography>
     </Container>
   );

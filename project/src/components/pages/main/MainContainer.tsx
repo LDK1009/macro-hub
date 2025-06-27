@@ -1,22 +1,20 @@
 "use client";
 
-import { Stack, styled } from "@mui/material";
-import MacroItem from "./container/MacroItem";
-import { mixinFlex } from "@/styles/mixins";
+import { Box } from "@mui/material";
+import HeroSection from "./container/HeroSection";
+import ServicesSection from "./container/ServicesSection";
+import PricingSection from "./container/PricingSection";
+import FooterSection from "./container/FooterSection";
 
 const MainContainer = () => {
   return (
-    <Container>
-      <MacroItem />
-    </Container>
+    <Box>
+      <HeroSection />
+      <ServicesSection />
+      <PricingSection />
+      <FooterSection />
+    </Box>
   );
 };
 
 export default MainContainer;
-
-const Container = styled(Stack)`
-  ${mixinFlex("column", "center", "center")}
-  width: 100%;
-  height: 100vh;
-  padding-top: 64px;
-`;
